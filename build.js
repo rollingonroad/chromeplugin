@@ -84,6 +84,12 @@ function clean() {
   } else {
     console.log('📁 发布目录不存在，无需清理');
   }
+  // 删除release.zip
+  const zipPath = path.join(__dirname, 'release.zip');
+  if (fs.existsSync(zipPath)) {
+    fs.unlinkSync(zipPath);
+    console.log('✅ release.zip 已删除');
+  }
 }
 
 function test() {
