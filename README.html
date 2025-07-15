@@ -16,23 +16,28 @@
 <li>🎨 现代化的UI设计</li>
 </ul>
 <h2>项目结构</h2>
-<pre><code>manifest.json           # 插件配置文件
-background.js           # 后台脚本
-content.js              # 内容脚本（主要功能）
-popup.html              # 弹窗界面
-popup.js                # 弹窗逻辑
-icon.png                # 插件图标
-package.json            # 项目配置
-build.js                # 构建脚本
-.gitignore              # Git忽略文件
-README.md               # 项目说明
-release/                # 构建产物目录
-release.zip             # 打包zip
-node_modules/           # 依赖目录
-tests/                  # 测试目录
-  ├── ipa-normalizer.test.js    # 音标标准化测试
-  ├── translation.test.js       # 翻译解析测试
-  └── run-tests.js              # 测试运行器
+<pre><code>src/
+  ├── manifest.json           # 插件配置文件
+  ├── background.js           # 后台脚本
+  ├── content.js              # 内容脚本（主要功能）
+  ├── popup.html              # 弹窗界面
+  ├── popup.js                # 弹窗逻辑
+  └── icons/
+      ├── icon-16.png
+      ├── icon-48.png
+      └── icon-128.png
+release/                      # 构建产物目录
+release.zip                   # 打包zip
+node_modules/                 # 依赖目录
+tests/                        # 测试目录
+  ├── ipa-normalizer.test.js  # 音标标准化测试
+  ├── translation.test.js     # 翻译解析测试
+  └── run-tests.js            # 测试运行器
+build.js                      # 构建脚本
+package.json                  # 项目配置
+README.md                     # 项目说明
+PRIVACY_POLICY.md             # 隐私政策
+.gitignore                    # Git忽略文件
 </code></pre>
 <h2>开发指南</h2>
 <h3>安装依赖</h3>
@@ -68,9 +73,9 @@ npm run clean
 <blockquote>
 <p><strong>说明：</strong></p>
 <ul>
-<li><code>release/</code> 目录为构建产物，不会被提交到git。</li>
-<li><code>release.zip</code> 是可直接上传到 Google Chrome Web Store 的标准包。</li>
-<li>所有测试、构建、打包命令均可通过 <code>npm run ...</code> 方式一键完成。</li>
+<li>所有源码和资源文件都在 <code>src/</code> 目录下，图标在 <code>src/icons/</code>。</li>
+<li>构建和打包命令会自动从 <code>src/</code> 复制所需文件到 <code>release/</code>。</li>
+<li>manifest.json 及相关路径均为相对 <code>src/</code> 目录。</li>
 <li><code>npm run gen:html</code> 会自动将 <code>README.md</code> 和 <code>PRIVACY_POLICY.md</code> 转换为 <code>README.html</code> 和 <code>PRIVACY_POLICY.html</code>，方便网页展示或提交。</li>
 </ul>
 </blockquote>

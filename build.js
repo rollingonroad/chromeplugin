@@ -16,12 +16,14 @@ async function ensureMarked() {
 
 // 发布文件列表
 const releaseFiles = [
-  'manifest.json',
-  'background.js',
-  'content.js',
-  'popup.html',
-  'popup.js',
-  'icon.png'
+  'src/manifest.json',
+  'src/background.js',
+  'src/content.js',
+  'src/popup.html',
+  'src/popup.js',
+  'src/icons/icon-16.png',
+  'src/icons/icon-48.png',
+  'src/icons/icon-128.png'
 ];
 
 // 发布目录
@@ -35,13 +37,22 @@ function build() {
     fs.mkdirSync(releaseDir, { recursive: true });
     console.log('📁 创建发布目录');
   }
-  
+  // 创建 icons 子目录
+  const iconsReleaseDir = path.join(releaseDir, 'icons');
+  if (!fs.existsSync(iconsReleaseDir)) {
+    fs.mkdirSync(iconsReleaseDir, { recursive: true });
+  }
   // 复制发布文件
   let copiedCount = 0;
   releaseFiles.forEach(file => {
     const sourcePath = path.join(__dirname, file);
-    const targetPath = path.join(__dirname, releaseDir, file);
-    
+    // 去掉src/前缀，发布到release根目录
+    const targetPath = path.join(__dirname, releaseDir, file.replace(/^src\//, ''));
+    // 确保子目录存在
+    const targetDir = path.dirname(targetPath);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
     if (fs.existsSync(sourcePath)) {
       fs.copyFileSync(sourcePath, targetPath);
       console.log(`📄 复制: ${file}`);

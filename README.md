@@ -12,23 +12,28 @@
 ## 项目结构
 
 ```
-manifest.json           # 插件配置文件
-background.js           # 后台脚本
-content.js              # 内容脚本（主要功能）
-popup.html              # 弹窗界面
-popup.js                # 弹窗逻辑
-icon.png                # 插件图标
-package.json            # 项目配置
-build.js                # 构建脚本
-.gitignore              # Git忽略文件
-README.md               # 项目说明
-release/                # 构建产物目录
-release.zip             # 打包zip
-node_modules/           # 依赖目录
-tests/                  # 测试目录
-  ├── ipa-normalizer.test.js    # 音标标准化测试
-  ├── translation.test.js       # 翻译解析测试
-  └── run-tests.js              # 测试运行器
+src/
+  ├── manifest.json           # 插件配置文件
+  ├── background.js           # 后台脚本
+  ├── content.js              # 内容脚本（主要功能）
+  ├── popup.html              # 弹窗界面
+  ├── popup.js                # 弹窗逻辑
+  └── icons/
+      ├── icon-16.png
+      ├── icon-48.png
+      └── icon-128.png
+release/                      # 构建产物目录
+release.zip                   # 打包zip
+node_modules/                 # 依赖目录
+tests/                        # 测试目录
+  ├── ipa-normalizer.test.js  # 音标标准化测试
+  ├── translation.test.js     # 翻译解析测试
+  └── run-tests.js            # 测试运行器
+build.js                      # 构建脚本
+package.json                  # 项目配置
+README.md                     # 项目说明
+PRIVACY_POLICY.md             # 隐私政策
+.gitignore                    # Git忽略文件
 ```
 
 ## 开发指南
@@ -73,9 +78,9 @@ npm run clean
 ```
 
 > **说明：**
-> - `release/` 目录为构建产物，不会被提交到git。
-> - `release.zip` 是可直接上传到 Google Chrome Web Store 的标准包。
-> - 所有测试、构建、打包命令均可通过 `npm run ...` 方式一键完成。
+> - 所有源码和资源文件都在 `src/` 目录下，图标在 `src/icons/`。
+> - 构建和打包命令会自动从 `src/` 复制所需文件到 `release/`。
+> - manifest.json 及相关路径均为相对 `src/` 目录。
 > - `npm run gen:html` 会自动将 `README.md` 和 `PRIVACY_POLICY.md` 转换为 `README.html` 和 `PRIVACY_POLICY.html`，方便网页展示或提交。
 
 ## 测试系统
