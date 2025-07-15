@@ -8,7 +8,9 @@
     "build": "node build.js build",
     "build:test": "node build.js build:test",
     "clean": "node build.js clean",
-    "dev": "echo '开发模式：直接编辑chromeplugin目录下的文件'"
+    "dev": "echo '开发模式：直接编辑chromeplugin目录下的文件'",
+    "build:zip": "node build.js build:zip",
+    "zip": "node build.js zip"
   },
   "keywords": [
     "chrome-extension",
@@ -18,8 +20,10 @@
   ],
   "author": "Your Name",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  },
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}
