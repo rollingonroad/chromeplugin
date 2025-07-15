@@ -1,0 +1,25 @@
+{
+  "name": "chrome-translation-plugin",
+  "version": "1.0.0",
+  "description": "英汉翻译Chrome插件，支持音标显示和发音",
+  "main": "content.js",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "build": "node build.js build",
+    "build:test": "node build.js build:test",
+    "clean": "node build.js clean",
+    "dev": "echo '开发模式：直接编辑chromeplugin目录下的文件'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "translation",
+    "ipa",
+    "pronunciation"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+} 

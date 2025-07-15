@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "英汉翻译",
+  "version": "1.0",
+  "description": "双击单词，统一以英语作为源语音翻译成中文，并给出音标",
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+} 
