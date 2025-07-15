@@ -19,7 +19,7 @@
     "ipa",
     "pronunciation"
   ],
-  "author": "Your Name",
+  "author": "David Wu",
   "license": "MIT",
   "devDependencies": {
     "archiver": "^7.0.1",
