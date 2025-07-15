@@ -19,7 +19,7 @@ const releaseFiles = [
 ];
 
 // 发布目录
-const releaseDir = '../release';
+const releaseDir = 'release';
 
 function build() {
   console.log('🔨 开始构建Chrome插件...\n');

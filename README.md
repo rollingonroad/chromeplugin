@@ -12,21 +12,23 @@
 ## 项目结构
 
 ```
-chromeplugin/
-├── manifest.json          # 插件配置文件
-├── background.js          # 后台脚本
-├── content.js             # 内容脚本（主要功能）
-├── popup.html             # 弹窗界面
-├── popup.js               # 弹窗逻辑
-├── icon.png               # 插件图标
-├── package.json           # 项目配置
-├── build.js               # 构建脚本
-├── .gitignore             # Git忽略文件
-├── README.md              # 项目说明
-└── tests/                 # 测试目录
-    ├── ipa-normalizer.test.js    # 音标标准化测试
-    ├── translation.test.js       # 翻译解析测试
-    └── run-tests.js              # 测试运行器
+manifest.json           # 插件配置文件
+background.js           # 后台脚本
+content.js              # 内容脚本（主要功能）
+popup.html              # 弹窗界面
+popup.js                # 弹窗逻辑
+icon.png                # 插件图标
+package.json            # 项目配置
+build.js                # 构建脚本
+.gitignore              # Git忽略文件
+README.md               # 项目说明
+release/                # 构建产物目录
+release.zip             # 打包zip
+node_modules/           # 依赖目录
+tests/                  # 测试目录
+  ├── ipa-normalizer.test.js    # 音标标准化测试
+  ├── translation.test.js       # 翻译解析测试
+  └── run-tests.js              # 测试运行器
 ```
 
 ## 开发指南
