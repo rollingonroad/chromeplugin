@@ -10,7 +10,8 @@
     "clean": "node build.js clean",
     "dev": "echo '开发模式：直接编辑chromeplugin目录下的文件'",
     "build:zip": "node build.js build:zip",
-    "zip": "node build.js zip"
+    "zip": "node build.js zip",
+    "gen:html": "node build.js gen:html"
   },
   "keywords": [
     "chrome-extension",
@@ -21,7 +22,8 @@
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
-    "archiver": "^7.0.1"
+    "archiver": "^7.0.1",
+    "marked": "^16.0.0"
   },
   "engines": {
     "node": ">=14.0.0"

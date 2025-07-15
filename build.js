@@ -7,6 +7,12 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const archiver = require('archiver');
+let marked;
+async function ensureMarked() {
+  if (!marked) {
+    marked = (await import('marked')).marked;
+  }
+}
 
 // 发布文件列表
 const releaseFiles = [
@@ -105,41 +111,64 @@ function zipRelease() {
   archive.finalize();
 }
 
+async function mdToHtml(mdPath, htmlPath, title) {
+  await ensureMarked();
+  if (!fs.existsSync(mdPath)) {
+    console.log(`❌ 文件不存在: ${mdPath}`);
+    return;
+  }
+  const mdContent = fs.readFileSync(mdPath, 'utf-8');
+  const htmlContent = `<!DOCTYPE html>\n<html lang='en'>\n<head>\n<meta charset='UTF-8'>\n<title>${title}</title>\n<style>body{max-width:800px;margin:40px auto;font-family:sans-serif;line-height:1.7;padding:0 16px;}pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto;}code{background:#f6f8fa;padding:2px 4px;border-radius:4px;}h1,h2,h3{margin-top:2em;}table{border-collapse:collapse;}th,td{border:1px solid #ccc;padding:6px 12px;}blockquote{color:#555;border-left:4px solid #ddd;padding-left:12px;}</style>\n</head>\n<body>\n${marked.parse(mdContent)}\n</body>\n</html>`;
+  fs.writeFileSync(htmlPath, htmlContent, 'utf-8');
+  console.log(`✅ 生成: ${htmlPath}`);
+}
+
+async function genHtml() {
+  await mdToHtml(path.join(__dirname, 'README.md'), path.join(__dirname, 'README.html'), 'README');
+  await mdToHtml(path.join(__dirname, 'PRIVACY_POLICY.md'), path.join(__dirname, 'PRIVACY_POLICY.html'), 'Privacy Policy');
+}
+
 // 命令行参数处理
 const args = process.argv.slice(2);
 const command = args[0];
 
-switch (command) {
-  case 'build':
-    build();
-    break;
-  case 'clean':
-    clean();
-    break;
-  case 'test':
-    test();
-    break;
-  case 'build:test':
-    test();
-    build();
-    break;
-  case 'build:zip':
-    build();
-    zipRelease();
-    break;
-  case 'zip':
-    zipRelease();
-    break;
-  default:
-    console.log('🔨 Chrome插件构建工具');
-    console.log('');
-    console.log('使用方法:');
-    console.log('  node build.js build      - 构建发布文件');
-    console.log('  node build.js clean      - 清理发布目录');
-    console.log('  node build.js test       - 运行测试');
-    console.log('  node build.js build:test - 运行测试后构建');
-    console.log('  node build.js build:zip  - 构建并打包为zip');
-    console.log('  node build.js zip        - 仅打包release为zip');
-    console.log('');
-    console.log('注意: 构建时会自动排除 tests/ 目录中的测试文件');
-} 
+(async () => {
+  switch (command) {
+    case 'build':
+      await build();
+      break;
+    case 'clean':
+      clean();
+      break;
+    case 'test':
+      test();
+      break;
+    case 'build:test':
+      test();
+      await build();
+      break;
+    case 'build:zip':
+      await build();
+      zipRelease();
+      break;
+    case 'zip':
+      zipRelease();
+      break;
+    case 'gen:html':
+      await genHtml();
+      break;
+    default:
+      console.log('🔨 Chrome插件构建工具');
+      console.log('');
+      console.log('使用方法:');
+      console.log('  node build.js build      - 构建发布文件');
+      console.log('  node build.js clean      - 清理发布目录');
+      console.log('  node build.js test       - 运行测试');
+      console.log('  node build.js build:test - 运行测试后构建');
+      console.log('  node build.js build:zip  - 构建并打包为zip');
+      console.log('  node build.js zip        - 仅打包release为zip');
+      console.log('  node build.js gen:html   - 生成README和隐私政策的HTML文件');
+      console.log('');
+      console.log('注意: 构建时会自动排除 tests/ 目录中的测试文件');
+  }
+})(); 

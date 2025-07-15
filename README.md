@@ -76,6 +76,7 @@ npm run clean
 > - `release/` 目录为构建产物，不会被提交到git。
 > - `release.zip` 是可直接上传到 Google Chrome Web Store 的标准包。
 > - 所有测试、构建、打包命令均可通过 `npm run ...` 方式一键完成。
+> - `npm run gen:html` 会自动将 `README.md` 和 `PRIVACY_POLICY.md` 转换为 `README.html` 和 `PRIVACY_POLICY.html`，方便网页展示或提交。
 
 ## 测试系统
 

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<title>README</title>
+<style>body{max-width:800px;margin:40px auto;font-family:sans-serif;line-height:1.7;padding:0 16px;}pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto;}code{background:#f6f8fa;padding:2px 4px;border-radius:4px;}h1,h2,h3{margin-top:2em;}table{border-collapse:collapse;}th,td{border:1px solid #ccc;padding:6px 12px;}blockquote{color:#555;border-left:4px solid #ddd;padding-left:12px;}</style>
+</head>
+<body>
+<h1>英汉翻译Chrome插件</h1>
+<p>一个支持音标显示和发音的英汉翻译Chrome插件。</p>
+<h2>功能特性</h2>
+<ul>
+<li>🎯 双击单词快速翻译</li>
+<li>🔤 显示标准IPA音标</li>
+<li>🔊 支持文本朗读和真人发音</li>
+<li>🎨 现代化的UI设计</li>
+</ul>
+<h2>项目结构</h2>
+<pre><code>manifest.json           # 插件配置文件
+background.js           # 后台脚本
+content.js              # 内容脚本（主要功能）
+popup.html              # 弹窗界面
+popup.js                # 弹窗逻辑
+icon.png                # 插件图标
+package.json            # 项目配置
+build.js                # 构建脚本
+.gitignore              # Git忽略文件
+README.md               # 项目说明
+release/                # 构建产物目录
+release.zip             # 打包zip
+node_modules/           # 依赖目录
+tests/                  # 测试目录
+  ├── ipa-normalizer.test.js    # 音标标准化测试
+  ├── translation.test.js       # 翻译解析测试
+  └── run-tests.js              # 测试运行器
+</code></pre>
+<h2>开发指南</h2>
+<h3>安装依赖</h3>
+<pre><code class="language-bash"># 进入项目目录
+cd chromeplugin
+
+# 安装依赖（如果有的话）
+npm install
+</code></pre>
+<h3>运行测试</h3>
+<pre><code class="language-bash"># 运行所有测试
+npm test
+
+# 或者直接运行
+node tests/run-tests.js
+</code></pre>
+<h3>构建发布</h3>
+<pre><code class="language-bash"># 运行测试后构建
+npm run build:test
+
+# 仅构建（不运行测试）
+npm run build
+
+# 构建并自动打包为release.zip（推荐提交Chrome Web Store）
+npm run build:zip
+
+# 只打包release目录为release.zip（release目录已存在时）
+npm run zip
+
+# 清理发布目录
+npm run clean
+</code></pre>
+<blockquote>
+<p><strong>说明：</strong></p>
+<ul>
+<li><code>release/</code> 目录为构建产物，不会被提交到git。</li>
+<li><code>release.zip</code> 是可直接上传到 Google Chrome Web Store 的标准包。</li>
+<li>所有测试、构建、打包命令均可通过 <code>npm run ...</code> 方式一键完成。</li>
+<li><code>npm run gen:html</code> 会自动将 <code>README.md</code> 和 <code>PRIVACY_POLICY.md</code> 转换为 <code>README.html</code> 和 <code>PRIVACY_POLICY.html</code>，方便网页展示或提交。</li>
+</ul>
+</blockquote>
+<h2>测试系统</h2>
+<h3>音标标准化测试</h3>
+<p>测试 <code>normalizeIPA</code> 函数的各种转换规则：</p>
+<ul>
+<li>美式ɹ转英式r</li>
+<li>ɾ(flap t)转t</li>
+<li>ɝɚ转ɜː</li>
+<li>oʊ转əʊ</li>
+<li>ɡ转g</li>
+<li>ɔ转ɔː</li>
+<li>ʊr转ʊə</li>
+<li>ər转ə</li>
+<li>多余长音符号处理</li>
+<li>斜杠去除</li>
+<li>空格规范化</li>
+</ul>
+<h3>翻译解析测试</h3>
+<p>测试 <code>parseGoogleResult</code> 函数的解析逻辑：</p>
+<ul>
+<li>标准翻译结果解析</li>
+<li>只有主翻译的情况</li>
+<li>空数据处理</li>
+<li>异常数据处理</li>
+</ul>
+<h3>运行测试</h3>
+<pre><code class="language-bash"># 运行所有测试
+node tests/run-tests.js
+
+# 运行特定测试
+node tests/ipa-normalizer.test.js
+node tests/translation.test.js
+</code></pre>
+<h2>发布流程</h2>
+<ol>
+<li><p><strong>运行测试</strong>：确保所有功能正常</p>
+<pre><code class="language-bash">npm test
+</code></pre>
+</li>
+<li><p><strong>构建并打包发布文件</strong>：生成干净的 <code>release.zip</code> 包</p>
+<pre><code class="language-bash">npm run build:zip
+</code></pre>
+</li>
+<li><p><strong>检查发布包</strong>：确认 <code>release.zip</code> 内包含所需文件</p>
+<ul>
+<li>manifest.json</li>
+<li>background.js</li>
+<li>content.js</li>
+<li>popup.html</li>
+<li>popup.js</li>
+<li>icon.png</li>
+</ul>
+</li>
+<li><p><strong>上传插件</strong>：将 <code>release.zip</code> 上传到 Chrome Web Store</p>
+</li>
+</ol>
+<h2>注意事项</h2>
+<ul>
+<li>测试文件位于 <code>tests/</code> 目录，不会被包含在发布包中</li>
+<li>构建脚本会自动排除测试相关文件</li>
+<li>发布前请确保所有测试通过</li>
+<li>音标转换规则基于中国常用的IPA标准</li>
+</ul>
+<h2>技术栈</h2>
+<ul>
+<li>Chrome Extension Manifest V3</li>
+<li>原生JavaScript</li>
+<li>Google Translate API</li>
+<li>Free Dictionary API</li>
+<li>Web Speech API</li>
+</ul>
+<h2>许可证</h2>
+<p>MIT License </p>
+
+</body>
+</html>
