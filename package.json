@@ -1,6 +1,6 @@
 {
   "name": "chrome-translation-plugin",
-  "version": "1.0.0",
+  "version": "1.2",
   "description": "英汉翻译Chrome插件，支持音标显示和发音",
   "main": "content.js",
   "scripts": {

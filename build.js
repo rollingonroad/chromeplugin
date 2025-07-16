@@ -84,12 +84,14 @@ function clean() {
   } else {
     console.log('📁 发布目录不存在，无需清理');
   }
-  // 删除release.zip
-  const zipPath = path.join(__dirname, 'release.zip');
-  if (fs.existsSync(zipPath)) {
-    fs.unlinkSync(zipPath);
-    console.log('✅ release.zip 已删除');
-  }
+  // 删除所有 release.*.zip
+  const files = fs.readdirSync(__dirname);
+  files.forEach(file => {
+    if (/^release\..*\.zip$/.test(file)) {
+      fs.unlinkSync(path.join(__dirname, file));
+      console.log(`✅ ${file} 已删除`);
+    }
+  });
 }
 
 function test() {
@@ -108,7 +110,11 @@ function test() {
 }
 
 function zipRelease() {
-  const zipPath = path.join(__dirname, 'release.zip');
+  // 读取 src/manifest.json 获取版本号
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'src/manifest.json'), 'utf-8'));
+  const version = manifest.version || 'unknown';
+  const zipName = `release.${version}.zip`;
+  const zipPath = path.join(__dirname, zipName);
   const releasePath = path.join(__dirname, releaseDir);
   if (!fs.existsSync(releasePath)) {
     console.log('❌ release 目录不存在，请先运行 build');
