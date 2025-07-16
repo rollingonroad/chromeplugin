@@ -11,7 +11,8 @@
     "dev": "echo '开发模式：直接编辑chromeplugin目录下的文件'",
     "build:zip": "node build.js build:zip",
     "zip": "node build.js zip",
-    "gen:html": "node build.js gen:html"
+    "gen:html": "node build.js gen:html",
+    "test:dj": "node tests/dj_phonetic_convert.test.js"
   },
   "keywords": [
     "chrome-extension",
