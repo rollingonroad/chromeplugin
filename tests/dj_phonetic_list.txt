@@ -1,7 +1,6 @@
 contradictory	/ˌkɑntɹəˈdɪktəɹi/	ˌkɑntrəˈdiktəri
 nefarious	/nɛˈfɛəɹi.əs/	neˈfeəriəs
 getting	/ˈɡɛɾɪŋ/	ˈgetiŋ
-individual	/ˌɘndɘˈvɘd͡ʒɘl/	ˌindiˈvidjuəl
 ability	/əˈ.bɪl.ɪ.ti/	əˈbiliti
 absolute	/ˈæb.səˌljuːt/	ˈæbsəˌlju:t
 academic	/ˌækəˈdɛmɪk/	ˌækəˈdemik
@@ -64,9 +63,7 @@ discussion	/dɪsˈkʊʃən/	disˈkuʃən
 education	/ˌɛdjʊˈkeɪʃn̩/	ˌedjuˈkeiʃən
 electricity	/ɪˌlɛkˈtɹɪsɪti/	iˌlekˈtrisiti
 emotion	/iˈmoʊʃən/	iˈmouʃən
-employee	/(ˌ)ɪm-/	im-
 encourage	/ɪnˈkʌɹɪdʒ/	inˈkʌriʤ
-environment	/-mɪnt/	-mint
 especially	/əˈspɛʃ(ə)li/	əˈspeʃəli
 essential	/ɪˈsɛn.ʃəl/	iˈsenʃəl
 establish	/ɪˈstæb.lɪʃ/	iˈstæbliʃ
@@ -103,7 +100,7 @@ invitation	/ɪn.vɪˈteɪ.ʃn̩/	inviˈteiʃən
 knowledge	/ˈnɒlɪdʒ/	ˈnɔliʤ
 language	/ˈleɪŋɡwɪd͡ʒ/	ˈleiŋgwiʤ
 leadership	/ˈliːdəʃɪp/	ˈli:dəʃip
-literature	/ˈlɪ.tə.ɹɪ.tʃə(ɹ)/	ˈlitəriʧə(r)
+literature	/ˈlɪ.tə.ɹɪ.tʃə(ɹ)/	ˈlitəriʧər
 measure	/ˈmɛʒə/	ˈmeʒə
 pleasure	/ˈplɛʒə/	ˈpleʒə
 breathe	/briːð/	bri:ð

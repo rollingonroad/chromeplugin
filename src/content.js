@@ -30,7 +30,7 @@ function createTranslatePopup(text, translated, x = null, y = null, autoSpeak = 
     popup.style.left = '50%';
     popup.style.transform = 'translate(-50%, 0)';
   }
-  // 顶部蓝色栏，喇叭可点击，标题为选中单词
+  // 顶部蓝色栏，增加音标类型切换按钮组
   const topBar = document.createElement('div');
   topBar.style.background = '#3578e5';
   topBar.style.height = '64px';
@@ -39,20 +39,36 @@ function createTranslatePopup(text, translated, x = null, y = null, autoSpeak = 
   topBar.style.padding = '0 24px';
   topBar.style.borderTopLeftRadius = '24px';
   topBar.style.borderTopRightRadius = '24px';
-  topBar.innerHTML = `
-    <span id="chromeplugin-main-speak-btn" style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;margin-right:16px;cursor:pointer;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+  // 音标类型下拉菜单，放在两面国旗之间
+  const phoneticType = (window.localStorage.getItem('chromeplugin-phonetic-type') || 'dj');
+  let phoneticTypeText = phoneticType === 'dj' ? '中国音标' : '国际音标';
+  // 恢复顶部栏国旗和箭头，单词+主发音按钮+国旗+箭头+国旗
+  let topBarHTML = `
+    <span style="
+      font-family: 'Segoe UI', 'San Francisco', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #222;
+      line-height: 1.2;
+      -webkit-font-smoothing: antialiased;
+      margin-right: 10px;">
+      ${text}
+    </span>
+    <span id="chromeplugin-main-speak-btn" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-left:10px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
         <path d="M3 10v4h4l5 5V5l-5 5H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z" fill="black"/>
         <path d="M14 3.23v2.06c3.39.49 6 3.39 6 6.71s-2.61 6.22-6 6.71v2.06c4.5-.51 8-4.31 8-8.77s-3.5-8.26-8-8.77z" fill="black"/>
       </svg>
     </span>
-    <span style="font-size:18px;font-weight:bold;letter-spacing:1px;color:#fff;flex:1;">${text}</span>
+    <span style='flex:1;'></span>
     <span style="display:flex;align-items:center;background:#fff2;border-radius:18px;padding:4px 12px;gap:6px;">
       <span style='font-size:20px;'>🇬🇧</span>
       <span style='font-size:18px;'>→</span>
       <span style='font-size:20px;'>🇨🇳</span>
     </span>
   `;
+  topBar.innerHTML = `<span style='display:flex;align-items:center;gap:0;flex:1;'>${topBarHTML}</span>`;
   // 主内容卡片
   const card = document.createElement('div');
   card.style.background = '#fff';
@@ -63,36 +79,103 @@ function createTranslatePopup(text, translated, x = null, y = null, autoSpeak = 
   card.style.overflowY = 'auto';
   // 内容：先音标，再中文翻译
   let html = '';
-  // 音标转换为中国常用IPA
+  // 音标转换函数：根据 phoneticType 切换
   function normalizeIPA(ipa) {
     if (!ipa) return '';
     let s = ipa;
-    // 常见美式/变体转英式IPA
-    s = s.replace(/ɹ/g, 'r'); // ɹ(turned r) -> r
-    s = s.replace(/ɾ/g, 't'); // ɾ(flap t) -> t
-    s = s.replace(/ɝ|ɚ/g, 'ɜː');
-    s = s.replace(/oʊ/g, 'əʊ');
-    s = s.replace(/ɡ/g, 'g');
-    s = s.replace(/ɔ(?!ː)/g, 'ɔː');
-    s = s.replace(/ʊr/g, 'ʊə');
-    s = s.replace(/ər/g, 'ə');
-    s = s.replace(/ːː+/g, 'ː'); // 多余长音
-    s = s.replace(/[\/]/g, ''); // 去除斜杠
-    s = s.replace(/\s+/g, ' '); // 多余空格
-    // 不再自动反转字符串
-    return s.trim();
+    if ((window.localStorage.getItem('chromeplugin-phonetic-type') || 'dj') === 'dj') {
+      // DJ规则（与 tests/dj_phonetic_convert.test.js 保持一致，简化版）
+      s = s.replace(/\(([^)]+)\)/g, '$1');
+      s = s.replace(/l\u0329/g, 'əl');
+      s = s.replace(/n\u0329/g, 'ən');
+      s = s.replace(/m\u0329/g, 'əm');
+      s = s.replace(/\.n\u0329/g, 'ən');
+      s = s.replace(/\.l\u0329/g, 'əl');
+      s = s.replace(/\.m\u0329/g, 'əm');
+      s = s.replace(/n\u0329\./g, 'ən');
+      s = s.replace(/l\u0329\./g, 'əl');
+      s = s.replace(/m\u0329\./g, 'əm');
+      s = s.replace(/\.ʃn\u0329/g, 'ʃən');
+      s = s.replace(/\.tn\u0329/g, 'tən');
+      s = s.replace(/\.dn\u0329/g, 'dən');
+      s = s.replace(/\.sn\u0329/g, 'sən');
+      s = s.replace(/\.tl\u0329/g, 'təl');
+      s = s.replace(/\.dl\u0329/g, 'dəl');
+      s = s.replace(/ɹ/g, 'r')
+        .replace(/ɾ/g, 't')
+        .replace(/ɘ/g, 'i')
+        .replace(/ɒ/g, 'ɔ')
+        .replace(/ɜː/g, 'ə:')
+        .replace(/ɜ/g, 'ə')
+        .replace(/ɡ/g, 'g')
+        .replace(/d͡ʒ|dʒ/g, 'ʤ')
+        .replace(/t͡ʃ|tʃ/g, 'ʧ')
+        .replace(/ʊ/g, 'u')
+        .replace(/ɪ/g, 'i')
+        .replace(/ʃ/g, 'ʃ')
+        .replace(/ʒ/g, 'ʒ')
+        .replace(/θ/g, 'θ')
+        .replace(/ð/g, 'ð')
+        .replace(/ŋ/g, 'ŋ')
+        .replace(/æ/g, 'æ')
+        .replace(/ɑː/g, 'ɑ:')
+        .replace(/ɑ/g, 'ɑ')
+        .replace(/ɔː/g, 'ɔ:')
+        .replace(/ɔ/g, 'ɔ')
+        .replace(/uː/g, 'u:')
+        .replace(/u/g, 'u')
+        .replace(/iː/g, 'i:')
+        .replace(/i/g, 'i')
+        .replace(/eɪ/g, 'ei')
+        .replace(/aɪ/g, 'ai')
+        .replace(/əʊ/g, 'əu')
+        .replace(/oʊ/g, 'ou')
+        .replace(/aʊ/g, 'au')
+        .replace(/ɔɪ/g, 'ɔi')
+        .replace(/juː/g, 'ju:')
+        .replace(/ju/g, 'ju')
+        .replace(/eə/g, 'eə')
+        .replace(/ɪə/g, 'iə')
+        .replace(/ʊə/g, 'uə')
+        .replace(/ɛ/g, 'e')
+        .replace(/ɫ/g, 'l');
+      s = s.replace(/nɛ/g, 'ne')
+        .replace(/ɡɛ/g, 'ge')
+        .replace(/dɛ/g, 'de')
+        .replace(/tɛ/g, 'te');
+      s = s.replace(/[\.]/g, '');
+      s = s.replace(/[\/\[\]]/g, '');
+      s = s.replace(/\s+/g, '');
+      return s.trim();
+    } else {
+      // 国际IPA，原样美化
+      s = s.replace(/[\/\[\]]/g, '');
+      s = s.replace(/\s+/g, ' ');
+      return s.trim();
+    }
   }
-  // 只显示标准音标（用斜线/方括号包裹或含音标字符）
+  // 下方音标后的发音按钮和音标类型选择（无音标时不显示下拉框）
   if (translated.pron && /[ˈˌɪʊʌæɔəθðʃʒŋːɑːɒɛɜːɡ]/.test(translated.pron)) {
     const normIPA = normalizeIPA(translated.pron);
     html += `<div style='color:#3578e5;font-size:22px;margin-bottom:10px;display:flex;align-items:center;'>/<span id='chromeplugin-ipa'>${normIPA}</span>/`;
     if (translated.audio) {
-      html += `<button id='chromeplugin-audio-btn' style='background:none;border:none;cursor:pointer;width:28px;height:28px;margin-left:8px;display:inline-flex;align-items:center;' title='真人发音'>
-        <svg width='28' height='28' viewBox='0 0 24 24' fill='none'>
+      html += `<button id='chromeplugin-audio-btn' style='background:none;border:none;cursor:pointer;width:20px;height:20px;margin-left:8px;display:inline-flex;align-items:center;' title='真人发音'>
+        <svg width='20' height='20' viewBox='0 0 24 24' fill='none'>
           <path d='M3 10v4h4l5 5V5l-5 5H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z' fill='black'/>
           <path d='M14 3.23v2.06c3.39.49 6 3.39 6 6.71s-2.61 6.22-6 6.71v2.06c4.5-.51 8-4.31 8-8.77s-3.5-8.26-8-8.77z' fill='black'/>
         </svg>
       </button>`;
+      // 音标类型选择：点击按钮直接切换，无需下拉弹层
+      // toggle控件恢复最初蓝/灰色外框和滑块，整体缩小20%，去掉“中国音标”外部按钮框，仅保留文字和toggle
+      const isDJ = phoneticType === 'dj';
+      html += `
+      <span style="display:flex;align-items:center;gap:8px;margin-left:8px;">
+        <span style="font-family: 'Segoe UI', 'San Francisco', 'Helvetica Neue', Arial, sans-serif;font-size:13px;color:#3578e5;">中国音标</span>
+        <span id='phonetic-toggle-btn' style="display:inline-block;width:25px;height:14px;position:relative;cursor:pointer;">
+          <span style="position:absolute;left:0;top:0;width:100%;height:100%;border-radius:7px;background:${isDJ ? '#3578e5' : '#ccc'};transition:background 0.2s;"></span>
+          <span style="position:absolute;top:1.5px;left:${isDJ ? '2px' : '11px'};width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:left 0.2s;"></span>
+        </span>
+      </span>`;
     }
     html += `</div>`;
   }
@@ -198,6 +281,18 @@ function createTranslatePopup(text, translated, x = null, y = null, autoSpeak = 
       popup.style.top = newY + 'px';
     }, 0);
   }
+  // 事件绑定：点击toggle控件切换
+  setTimeout(() => {
+    const toggleBtn = card.querySelector('#phonetic-toggle-btn');
+    if (toggleBtn) {
+      toggleBtn.onclick = (e) => {
+        const newType = (window.localStorage.getItem('chromeplugin-phonetic-type') || 'dj') === 'dj' ? 'ipa' : 'dj';
+        window.localStorage.setItem('chromeplugin-phonetic-type', newType);
+        removeTranslatePopup();
+        createTranslatePopup(text, translated, x, y, autoSpeak);
+      };
+    }
+  }, 0);
 }
 
 // 解析 Google 翻译 API 结果，提取主翻译、音标、词性、释义
