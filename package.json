@@ -23,7 +23,8 @@
   "license": "MIT",
   "devDependencies": {
     "archiver": "^7.0.1",
-    "marked": "^16.0.0"
+    "marked": "^16.0.0",
+    "node-fetch": "^2.7.0"
   },
   "engines": {
     "node": ">=14.0.0"
