@@ -1,3 +1,45 @@
+// 中国用户检测标志
+let isChineseUser = false;
+
+// 检测用户是否在中国境内
+function detectChineseUser() {
+  // 检查浏览器语言
+  const language = navigator.language || navigator.userLanguage;
+  const isChineseLang = language.startsWith('zh');
+  
+  // 检查时区
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const isChineseTimezone = timezone.includes('Asia/Shanghai') || 
+                           timezone.includes('Asia/Urumqi') ||
+                           timezone.includes('Asia/Harbin') ||
+                           timezone.includes('Asia/Chongqing') ||
+                           timezone.includes('Asia/Kashgar');
+  
+  // 检查系统区域设置
+  const locale = new Intl.NumberFormat().resolvedOptions().locale;
+  const isChineseLocale = locale.includes('zh-CN');
+  
+  // 综合判断：语言、时区、区域设置中至少有两个匹配
+  const indicators = [isChineseLang, isChineseTimezone, isChineseLocale];
+  const matchCount = indicators.filter(Boolean).length;
+  
+  return matchCount >= 2;
+}
+
+// 初始化时检测用户位置
+function initializeUserLocation() {
+  isChineseUser = detectChineseUser();
+  
+  console.log('用户位置检测结果:', isChineseUser ? '中国用户' : '非中国用户');
+}
+
+// 页面加载时执行检测
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeUserLocation);
+} else {
+  initializeUserLocation();
+}
+
 // 监听用户选中内容
 let selectedText = '';
 
