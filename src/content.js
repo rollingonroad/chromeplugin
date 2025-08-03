@@ -15,15 +15,8 @@ function detectChineseUser() {
                            timezone.includes('Asia/Chongqing') ||
                            timezone.includes('Asia/Kashgar');
   
-  // 检查系统区域设置
-  const locale = new Intl.NumberFormat().resolvedOptions().locale;
-  const isChineseLocale = locale.includes('zh-CN');
-  
-  // 综合判断：语言、时区、区域设置中至少有两个匹配
-  const indicators = [isChineseLang, isChineseTimezone, isChineseLocale];
-  const matchCount = indicators.filter(Boolean).length;
-  
-  return matchCount >= 2;
+  // 严格判断：语言和时区都必须是中国的才认为是中国用户
+  return isChineseLang && isChineseTimezone;
 }
 
 // 初始化时检测用户位置
@@ -337,6 +330,23 @@ function createTranslatePopup(text, translated, x = null, y = null, autoSpeak = 
   }, 0);
 }
 
+// 通过background script请求翻译
+async function requestTranslation(text, isChineseUser) {
+  try {
+    console.log('发送翻译请求:', text, 'isChineseUser:', isChineseUser);
+    const response = await chrome.runtime.sendMessage({
+      action: 'translate',
+      text: text,
+      isChineseUser: isChineseUser
+    });
+    console.log('收到翻译响应:', response);
+    return response;
+  } catch (error) {
+    console.log('翻译请求失败:', error);
+    return { success: false, result: '翻译失败' };
+  }
+}
+
 // 解析 Google 翻译 API 结果，提取主翻译、音标、词性、释义
 function parseGoogleResult(data) {
   let main = '', pron = '', pos = '', explains = [];
@@ -357,16 +367,21 @@ document.addEventListener('dblclick', async (e) => {
   const x = e.clientX + 10;
   const y = e.clientY + 10;
   createTranslatePopup(text, { main: '正在翻译...' }, x, y, false);
-  // 并行请求 Google 翻译和 Free Dictionary API
-  let googleData = null, ipa = '', audioUrl = '';
+  
+  let translationResult = '', ipa = '', audioUrl = '';
+  
   try {
-    const [googleRes, dictRes] = await Promise.all([
-      fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${encodeURIComponent(text)}`),
-      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(text)}`)
-    ]);
-    const googleJson = await googleRes.json();
-    googleData = parseGoogleResult(googleJson);
+    // 通过background script请求翻译
+    const translationResponse = await requestTranslation(text, isChineseUser);
+    if (translationResponse.success) {
+      translationResult = translationResponse.result;
+    } else {
+      translationResult = '翻译失败';
+    }
+    
+    // 获取音标和音频（使用Free Dictionary API）
     try {
+      const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(text)}`);
       const dictJson = await dictRes.json();
       if (Array.isArray(dictJson) && dictJson[0]?.phonetics?.length) {
         // 取第一个有 text 的音标
@@ -380,8 +395,15 @@ document.addEventListener('dblclick', async (e) => {
           audioUrl = audioObj.audio;
         }
       }
-    } catch {}
-  } catch {}
+    } catch (error) {
+      console.log('获取音标失败:', error);
+    }
+    
+  } catch (error) {
+    console.log('翻译失败:', error);
+    translationResult = '翻译失败';
+  }
+  
   removeTranslatePopup();
-  createTranslatePopup(text, { ...googleData, pron: ipa, audio: audioUrl }, x, y, true);
+  createTranslatePopup(text, { main: translationResult, pron: ipa, audio: audioUrl }, x, y, true);
 }); 

@@ -6,6 +6,12 @@
   "permissions": [
     "storage"
   ],
+  "host_permissions": [
+    "https://translate.googleapis.com/*",
+    "https://api.mymemory.translated.net/*",
+    "https://lingva.ml/*",
+    "https://api.dictionaryapi.dev/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
