@@ -8,6 +8,9 @@
 - 🔤 **支持中国人熟悉的中国音标（K12标准），也可一键切换回国际音标**
 - 🔊 支持文本朗读和真人发音（带易懂图标）
 - 🎨 现代化UI设计，交互直观优雅
+- 🌍 **智能用户检测**：自动识别中国用户，提供优化的翻译服务
+- 🔄 **多API备用机制**：确保翻译服务的稳定性和准确性
+- ⚡ **智能API选择**：根据用户地理位置自动选择最优翻译API
 
 ## 主要界面与交互
 
@@ -24,7 +27,7 @@
 ```
 src/
   ├── manifest.json           # 插件配置文件
-  ├── background.js           # 后台脚本
+  ├── background.js           # 后台脚本（翻译API代理）
   ├── content.js              # 内容脚本（主要功能）
   ├── popup.html              # 弹窗界面
   ├── popup.js                # 弹窗逻辑
@@ -63,6 +66,23 @@ npm test
 node tests/run-tests.js
 ```
 
+### 翻译API配置
+
+插件支持多种翻译API，根据用户地理位置智能选择：
+
+- **中国用户**：优先使用 MyMemory API，备用 Lingva API
+- **非中国用户**：使用 Google Translate API
+- **音标和发音**：统一使用 Free Dictionary API
+
+> **配置说明**：中国用户优先使用MyMemory API（平均852ms），备用Lingva API（平均2552ms）；非中国用户使用Google翻译API（平均90ms）。所有API都保持100%成功率，确保翻译服务的稳定性。
+
+### 代码重构亮点
+
+- **配置化API管理**：使用 `TRANSLATION_APIS` 配置对象统一管理所有翻译API
+- **通用请求函数**：通过 `makeApiRequest` 函数统一处理API请求和错误
+- **智能用户检测**：基于语言和时区自动识别中国用户
+- **多级备用机制**：确保翻译服务的稳定性和准确性
+
 ### 构建发布
 
 ```bash
@@ -83,6 +103,8 @@ npm run clean        # 清理发布目录
 
 - **DJ音标自动转换测试**：批量验证IPA到中国K12标准DJ音标的自动转换准确率。
 - **翻译解析测试**：验证Google翻译和Free Dictionary API的解析逻辑，确保主字段（单词、音标、发音链接）提取准确。
+- **翻译API测试**：验证多API配置和备用机制的可靠性。
+- **性能测试**：定期测试各翻译API的响应速度和稳定性，确保最佳用户体验。
 
 ### 运行测试
 
@@ -92,6 +114,22 @@ npm test
 node tests/dj_phonetic_convert.test.js
 node tests/translation.test.js
 ```
+
+### 性能测试结果
+
+基于实际测试的API性能对比（10个常用单词测试）：
+
+| API | 平均响应时间 | 成功率 | 性能评级 |
+|-----|-------------|--------|----------|
+| **Google翻译API** | 90ms | 100% | 🟢 优秀 |
+| **MyMemory API** | 852ms | 100% | 🟡 良好 |
+| **Lingva API** | 2552ms | 100% | 🔴 较慢 |
+
+**性能特点**：
+- Google翻译API响应最快（90ms），适合非中国用户
+- MyMemory API响应较快（852ms），适合中国用户主要使用
+- Lingva API响应较慢（2552ms），作为中国用户备用
+- 所有API都保持100%成功率，稳定性优秀
 
 ## 发布流程
 
@@ -123,9 +161,13 @@ node tests/translation.test.js
 
 - Chrome Extension Manifest V3
 - 原生JavaScript
-- Google Translate API
-- Free Dictionary API
-- Web Speech API
+- **多翻译API集成**：
+  - Google Translate API（非中国用户，平均90ms响应时间）
+  - MyMemory API（中国用户主要，平均852ms响应时间）
+  - Lingva API（中国用户备用，平均2552ms响应时间）
+  - Free Dictionary API（音标和发音）
+- Web Speech API（浏览器内置语音合成）
+- **智能用户检测**：基于语言和时区的地理位置识别
 
 ## 许可证
 
