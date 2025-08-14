@@ -4,19 +4,26 @@
  */
 
 // 模拟翻译API配置（从background.js复制）
+const BAIDU_PROXY_ENDPOINT = 'https://api.yun.info/api/translate';
 const TRANSLATION_APIS = {
+  // 百度翻译代理（Vercel / 自建代理）
+  baidu: {
+    url: (text) => `${BAIDU_PROXY_ENDPOINT}?q=${encodeURIComponent(text)}&from=en&to=zh`,
+    name: '百度翻译代理',
+    parser: (data) => {
+      try {
+        if (data && data.success && Array.isArray(data.data) && data.data[0]?.dst) {
+          return data.data[0].dst;
+        }
+      } catch {}
+      return null;
+    }
+  },
   // MyMemory翻译 (备用)
   myMemory: {
     url: (text) => `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh`,
     name: 'MyMemory翻译',
     parser: (data) => data.responseData?.translatedText || null
-  },
-  
-  // Lingva翻译 (主要)
-  lingva: {
-    url: (text) => `https://lingva.ml/api/v1/en/zh/${encodeURIComponent(text)}`,
-    name: 'Lingva翻译',
-    parser: (data) => data.translation || null
   },
   
   // Google翻译
@@ -30,18 +37,18 @@ const TRANSLATION_APIS = {
 // 模拟通用的API请求函数
 async function makeApiRequest(url, apiName, responseParser) {
   try {
-    console.log(`开始${apiName}:`, url);
+    console.log(`[${apiName}] 发送请求:`, url);
     const response = await fetch(url);
     const data = await response.json();
-    console.log(`${apiName}响应:`, data);
+    console.log(`[${apiName}] 接收响应:`, data);
     
     const result = responseParser(data);
     if (result) {
-      console.log(`${apiName}结果:`, result);
+      console.log(`[${apiName}] 解析结果:`, result);
       return result;
     }
   } catch (error) {
-    console.log(`${apiName}失败:`, error);
+    console.log(`[${apiName}] 请求失败:`, error);
   }
   return null;
 }
@@ -50,7 +57,7 @@ async function makeApiRequest(url, apiName, responseParser) {
 async function translateWithApi(apiKey, text) {
   const api = TRANSLATION_APIS[apiKey];
   if (!api) {
-    console.log(`未知的API: ${apiKey}`);
+    console.log(`[未知API] 未知的API: ${apiKey}`);
     return null;
   }
   
@@ -62,16 +69,16 @@ async function handleTranslation(text, isChineseUser) {
   let translationResult = '';
   
   if (isChineseUser) {
-    // 中国用户：先尝试MyMemory翻译，失败则使用Lingva
-    console.log('检测到中国用户，使用MyMemory翻译');
-    translationResult = await translateWithApi('myMemory', text);
+    // 中国用户：优先百度，其次 MyMemory
+    console.log('[Test] 检测到中国用户，优先使用百度翻译代理');
+    translationResult = await translateWithApi('baidu', text);
     if (!translationResult) {
-      console.log('MyMemory翻译失败，尝试Lingva翻译');
-      translationResult = await translateWithApi('lingva', text);
+      console.log('[Test] 百度翻译失败，尝试MyMemory翻译');
+      translationResult = await translateWithApi('myMemory', text);
     }
   } else {
     // 非中国用户：使用Google翻译
-    console.log('检测到非中国用户，使用Google翻译');
+    console.log('[Test] 检测到非中国用户，使用Google翻译');
     translationResult = await translateWithApi('google', text);
   }
   
@@ -88,10 +95,10 @@ const testCases = [
     expectedResult: '成熟'
   },
   {
-    name: '中国用户 - MyMemory失败，Lingva备用',
+    name: '中国用户 - 百度优先，MyMemory备用',
     text: 'testword',
     isChineseUser: true,
-    expectedApi: 'lingva',
+    expectedApi: 'baidu',
     expectedResult: null // 可能失败
   },
   {
@@ -112,7 +119,7 @@ function testApiConfiguration() {
   
   // 测试API配置对象
   console.log('1️⃣ 测试API配置对象结构');
-  const requiredApis = ['myMemory', 'lingva', 'google'];
+  const requiredApis = ['baidu', 'myMemory', 'google'];
   for (const apiKey of requiredApis) {
     if (TRANSLATION_APIS[apiKey]) {
       const api = TRANSLATION_APIS[apiKey];
@@ -147,8 +154,8 @@ function testApiConfiguration() {
   // 测试解析函数
   console.log('\n3️⃣ 测试解析函数');
   const testData = {
+    baidu: { success: true, data: [{ src: 'hello', dst: '测试' }], from: 'en', to: 'zh' },
     myMemory: { responseData: { translatedText: '测试' } },
-    lingva: { translation: '测试' },
     google: [[['测试', 'test', null, null]]]
   };
   

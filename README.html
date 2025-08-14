@@ -17,14 +17,16 @@
 <li>🌍 <strong>智能用户检测</strong>：自动识别中国用户，提供优化的翻译服务</li>
 <li>🔄 <strong>多API备用机制</strong>：确保翻译服务的稳定性和准确性</li>
 <li>⚡ <strong>智能API选择</strong>：根据用户地理位置自动选择最优翻译API</li>
+<li>🛡️ <strong>HTTPS安全连接</strong>：所有API调用均使用HTTPS协议</li>
+<li>🏷️ <strong>标签页级别错误管理</strong>：每个新标签页独立管理翻译API状态</li>
 </ul>
 <h2>主要界面与交互</h2>
 <ul>
 <li><strong>主弹窗顶部</strong>：显示选中单词（大号字体）、主发音按钮、国旗与箭头，整体美观。</li>
-<li><strong>音标行</strong>：展示音标，后跟“真人发音”按钮（扬声器图标），按钮更易理解。</li>
+<li><strong>音标行</strong>：展示音标，后跟&quot;真人发音&quot;按钮（扬声器图标），按钮更易理解。</li>
 <li><strong>音标类型切换</strong>：<ul>
 <li>默认显示中国音标（K12标准），中国用户最熟悉，学习无障碍。</li>
-<li>右侧有iOS风格toggle控件，点击即可在“中国音标/国际音标”间切换，满足不同学习/考试需求。</li>
+<li>右侧有iOS风格toggle控件，点击即可在&quot;中国音标/国际音标&quot;间切换，满足不同学习/考试需求。</li>
 <li>toggle控件小巧，状态一目了然，无需下拉菜单，交互极简。</li>
 </ul>
 </li>
@@ -47,6 +49,9 @@ node_modules/                 # 依赖目录
 tests/                        # 测试目录
   ├── dj_phonetic_convert.test.js # DJ音标自动转换测试
   ├── translation.test.js     # 翻译解析测试
+  ├── benchmark_cn_providers.js # 中国用户翻译提供方基准测试
+  ├── translation_api_config.test.js # 翻译API配置测试
+  ├── refactoring.test.js     # 代码重构测试
   └── run-tests.js            # 测试运行器
 build.js                      # 构建脚本
 package.json                  # 项目配置
@@ -67,19 +72,27 @@ node tests/run-tests.js
 <h3>翻译API配置</h3>
 <p>插件支持多种翻译API，根据用户地理位置智能选择：</p>
 <ul>
-<li><strong>中国用户</strong>：优先使用 MyMemory API，备用 Lingva API</li>
+<li><strong>中国用户</strong>：优先使用百度翻译代理，备用 MyMemory API</li>
 <li><strong>非中国用户</strong>：使用 Google Translate API</li>
 <li><strong>音标和发音</strong>：统一使用 Free Dictionary API</li>
 </ul>
 <blockquote>
-<p><strong>配置说明</strong>：中国用户优先使用MyMemory API（平均852ms），备用Lingva API（平均2552ms）；非中国用户使用Google翻译API（平均90ms）。所有API都保持100%成功率，确保翻译服务的稳定性。</p>
+<p><strong>配置说明</strong>：中国用户优先使用百度翻译代理（平均396ms），备用MyMemory API（平均502ms）；非中国用户使用Google翻译API（平均90ms）。所有API都保持100%成功率，确保翻译服务的稳定性。</p>
 </blockquote>
+<h3>智能错误处理机制</h3>
+<ul>
+<li><strong>标签页级别状态管理</strong>：每个标签页独立管理翻译API状态</li>
+<li><strong>百度代理错误检测</strong>：当百度代理返回500错误且errorCode为<code>BAIDU_PROVIDER_DISABLED</code>时，该标签页后续请求直接使用MyMemory</li>
+<li><strong>新标签页重置</strong>：用户打开新标签页时，重新尝试百度代理，确保最佳体验</li>
+<li><strong>HTTPS安全连接</strong>：所有API调用均使用HTTPS协议，提供更好的安全性和兼容性</li>
+</ul>
 <h3>代码重构亮点</h3>
 <ul>
 <li><strong>配置化API管理</strong>：使用 <code>TRANSLATION_APIS</code> 配置对象统一管理所有翻译API</li>
 <li><strong>通用请求函数</strong>：通过 <code>makeApiRequest</code> 函数统一处理API请求和错误</li>
 <li><strong>智能用户检测</strong>：基于语言和时区自动识别中国用户</li>
 <li><strong>多级备用机制</strong>：确保翻译服务的稳定性和准确性</li>
+<li><strong>详细调试信息</strong>：每个API调用都有清晰的接口标识，便于调试</li>
 </ul>
 <h3>构建发布</h3>
 <pre><code class="language-bash">npm run build:test   # 运行测试后构建
@@ -87,6 +100,7 @@ npm run build        # 仅构建
 npm run build:zip    # 构建并打包为release.zip
 npm run zip          # 只打包release目录为zip
 npm run clean        # 清理发布目录
+npm run bench:cn     # 运行中国用户翻译提供方基准测试
 </code></pre>
 <blockquote>
 <p><strong>说明：</strong></p>
@@ -101,7 +115,9 @@ npm run clean        # 清理发布目录
 <ul>
 <li><strong>DJ音标自动转换测试</strong>：批量验证IPA到中国K12标准DJ音标的自动转换准确率。</li>
 <li><strong>翻译解析测试</strong>：验证Google翻译和Free Dictionary API的解析逻辑，确保主字段（单词、音标、发音链接）提取准确。</li>
-<li><strong>翻译API测试</strong>：验证多API配置和备用机制的可靠性。</li>
+<li><strong>翻译API配置测试</strong>：验证多API配置和备用机制的可靠性。</li>
+<li><strong>中国用户翻译提供方基准测试</strong>：评估百度代理和MyMemory的成功率与响应时间。</li>
+<li><strong>代码重构测试</strong>：验证代码质量和结构完整性。</li>
 <li><strong>性能测试</strong>：定期测试各翻译API的响应速度和稳定性，确保最佳用户体验。</li>
 </ul>
 <h3>运行测试</h3>
@@ -109,9 +125,12 @@ npm run clean        # 清理发布目录
 # 或单独运行
 node tests/dj_phonetic_convert.test.js
 node tests/translation.test.js
+node tests/benchmark_cn_providers.js
+node tests/translation_api_config.test.js
+node tests/refactoring.test.js
 </code></pre>
 <h3>性能测试结果</h3>
-<p>基于实际测试的API性能对比（10个常用单词测试）：</p>
+<p>基于实际测试的API性能对比（5个单词，每个运行4次）：</p>
 <table>
 <thead>
 <tr>
@@ -122,31 +141,44 @@ node tests/translation.test.js
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Google翻译API</strong></td>
-<td>90ms</td>
+<td><strong>百度翻译代理</strong></td>
+<td>396ms</td>
 <td>100%</td>
 <td>🟢 优秀</td>
 </tr>
 <tr>
 <td><strong>MyMemory API</strong></td>
-<td>852ms</td>
+<td>502ms</td>
 <td>100%</td>
 <td>🟡 良好</td>
 </tr>
 <tr>
-<td><strong>Lingva API</strong></td>
-<td>2552ms</td>
+<td><strong>Google翻译API</strong></td>
+<td>90ms</td>
 <td>100%</td>
-<td>🔴 较慢</td>
+<td>🟢 优秀</td>
 </tr>
 </tbody></table>
 <p><strong>性能特点</strong>：</p>
 <ul>
+<li>百度翻译代理响应最快（396ms），适合中国用户主要使用</li>
+<li>MyMemory API响应较快（502ms），作为中国用户备用</li>
 <li>Google翻译API响应最快（90ms），适合非中国用户</li>
-<li>MyMemory API响应较快（852ms），适合中国用户主要使用</li>
-<li>Lingva API响应较慢（2552ms），作为中国用户备用</li>
 <li>所有API都保持100%成功率，稳定性优秀</li>
 </ul>
+<h2>调试指南</h2>
+<h3>查看调试信息</h3>
+<ul>
+<li><strong>content.js 调试信息</strong>：在网页的开发者工具控制台中查看</li>
+<li><strong>background.js 调试信息</strong>：在扩展管理页面点击&quot;Service Worker&quot;查看</li>
+</ul>
+<h3>调试信息格式</h3>
+<p>所有调试信息都包含接口标识，便于追踪：</p>
+<pre><code>[百度翻译代理] 发送请求: https://api.yun.info/api/translate?q=hello&amp;from=en&amp;to=zh
+[百度翻译代理] 接收响应: {...}
+[百度翻译代理] 解析结果: 你好
+[Background] 检测到中国用户，优先使用百度翻译代理
+</code></pre>
 <h2>发布流程</h2>
 <ol>
 <li><strong>运行测试</strong>：确保所有功能正常<pre><code class="language-bash">npm test
@@ -172,20 +204,23 @@ node tests/translation.test.js
 <li>构建脚本会自动排除测试相关文件</li>
 <li>发布前请确保所有测试通过</li>
 <li>音标转换规则基于中国K12标准和国际IPA标准</li>
+<li>所有API调用均使用HTTPS协议</li>
+<li>每个标签页独立管理翻译API状态</li>
 </ul>
 <h2>技术栈</h2>
 <ul>
 <li>Chrome Extension Manifest V3</li>
 <li>原生JavaScript</li>
 <li><strong>多翻译API集成</strong>：<ul>
+<li>百度翻译代理（中国用户主要，平均396ms响应时间）</li>
+<li>MyMemory API（中国用户备用，平均502ms响应时间）</li>
 <li>Google Translate API（非中国用户，平均90ms响应时间）</li>
-<li>MyMemory API（中国用户主要，平均852ms响应时间）</li>
-<li>Lingva API（中国用户备用，平均2552ms响应时间）</li>
 <li>Free Dictionary API（音标和发音）</li>
 </ul>
 </li>
 <li>Web Speech API（浏览器内置语音合成）</li>
 <li><strong>智能用户检测</strong>：基于语言和时区的地理位置识别</li>
+<li><strong>标签页级别状态管理</strong>：独立管理每个标签页的翻译API状态</li>
 </ul>
 <h2>许可证</h2>
 <p>MIT License </p>

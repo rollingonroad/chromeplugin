@@ -1,16 +1,17 @@
 {
   "manifest_version": 3,
   "name": "英汉翻译",
-  "version": "1.3",
+  "version": "1.4",
   "description": "双击单词，统一以英语作为源语言翻译成中文。音标支持中国人更熟悉的中国音标，也可一键切换为标准国际音标。",
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
     "https://api.mymemory.translated.net/*",
-    "https://lingva.ml/*",
-    "https://api.dictionaryapi.dev/*"
+    "https://api.dictionaryapi.dev/*",
+    "https://api.yun.info/*"
   ],
   "background": {
     "service_worker": "background.js"

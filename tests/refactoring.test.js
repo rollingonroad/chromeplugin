@@ -100,11 +100,11 @@ function testCodeStructure() {
     }
     
     // 检查中国用户翻译逻辑
-    if (backgroundContent.includes('lingva') && backgroundContent.includes('myMemory')) {
-      console.log('  ✅ background.js 包含中国用户翻译逻辑（Lingva + MyMemory）');
+    if (backgroundContent.includes('myMemory') && backgroundContent.includes('baidu') && backgroundContent.includes('tabBaiduDisabled')) {
+      console.log('  ✅ background.js 包含中国用户翻译逻辑（Baidu + MyMemory + 标签页错误状态管理）');
       passed++;
     } else {
-      console.log('  ❌ background.js 缺少中国用户翻译逻辑');
+      console.log('  ❌ background.js 缺少中国用户翻译逻辑或标签页错误状态管理');
       failed++;
     }
   }
@@ -173,7 +173,7 @@ function testManifestConfiguration() {
       }
       
       // 检查必要的权限
-      const requiredPermissions = ['storage'];
+      const requiredPermissions = ['storage', 'tabs'];
       for (const permission of requiredPermissions) {
         if (manifest.permissions && manifest.permissions.includes(permission)) {
           console.log(`  ✅ 包含权限: ${permission}`);
@@ -188,7 +188,6 @@ function testManifestConfiguration() {
       const requiredHosts = [
         'https://translate.googleapis.com/*',
         'https://api.mymemory.translated.net/*',
-        'https://lingva.ml/*',
         'https://api.dictionaryapi.dev/*'
       ];
       
