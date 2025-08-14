@@ -51,6 +51,19 @@ function setTabBaiduDisabled(tabId) {
   }
 }
 
+// 清理标签页状态
+function cleanupTabState(tabId) {
+  if (tabId) {
+    tabBaiduDisabled.delete(tabId);
+    console.log(`[Background] 清理标签页 ${tabId} 的状态`);
+  }
+}
+
+// 监听标签页关闭事件，清理相关状态
+chrome.tabs.onRemoved.addListener((tabId) => {
+  cleanupTabState(tabId);
+});
+
 // 通用的API请求函数
 async function makeApiRequest(url, apiName, responseParser, tabId = null) {
   try {

@@ -173,7 +173,7 @@ function testManifestConfiguration() {
       }
       
       // 检查必要的权限
-      const requiredPermissions = ['storage'];
+      const requiredPermissions = ['storage', 'tabs'];
       for (const permission of requiredPermissions) {
         if (manifest.permissions && manifest.permissions.includes(permission)) {
           console.log(`  ✅ 包含权限: ${permission}`);
