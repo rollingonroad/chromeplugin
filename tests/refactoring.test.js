@@ -100,11 +100,11 @@ function testCodeStructure() {
     }
     
     // 检查中国用户翻译逻辑
-    if (backgroundContent.includes('myMemory') && backgroundContent.includes('baidu') && backgroundContent.includes('tabBaiduDisabled')) {
-      console.log('  ✅ background.js 包含中国用户翻译逻辑（Baidu + MyMemory + 标签页错误状态管理）');
+    if (backgroundContent.includes('myMemory') && backgroundContent.includes('baidu') && backgroundContent.includes('BAIDU_DISABLED_TIMEOUT')) {
+      console.log('  ✅ background.js 包含中国用户翻译逻辑（Baidu + MyMemory + 3小时时间清理机制）');
       passed++;
     } else {
-      console.log('  ❌ background.js 缺少中国用户翻译逻辑或标签页错误状态管理');
+      console.log('  ❌ background.js 缺少中国用户翻译逻辑或时间清理机制');
       failed++;
     }
   }
@@ -173,7 +173,7 @@ function testManifestConfiguration() {
       }
       
       // 检查必要的权限
-      const requiredPermissions = ['storage', 'tabs'];
+      const requiredPermissions = ['storage'];
       for (const permission of requiredPermissions) {
         if (manifest.permissions && manifest.permissions.includes(permission)) {
           console.log(`  ✅ 包含权限: ${permission}`);

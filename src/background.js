@@ -31,38 +31,59 @@ const TRANSLATION_APIS = {
   }
 };
 
-// 标签页级别的百度代理状态
-const tabBaiduDisabled = new Set();
+// 标签页级别的百度代理状态（包含时间戳）
+const tabBaiduDisabled = new Map(); // 改为Map来存储tabId和时间戳
+const BAIDU_DISABLED_TIMEOUT = 3 * 60 * 60 * 1000; // 3小时（毫秒）
 
 // 获取标签页ID
 function getTabId(sender) {
   return sender.tab ? sender.tab.id : null;
 }
 
-// 检查标签页是否已禁用百度代理
+// 检查标签页是否已禁用百度代理（包含时间检查）
 function isTabBaiduDisabled(tabId) {
-  return tabId && tabBaiduDisabled.has(tabId);
+  if (!tabId || !tabBaiduDisabled.has(tabId)) {
+    return false;
+  }
+  
+  const disabledTime = tabBaiduDisabled.get(tabId);
+  const now = Date.now();
+  
+  // 检查是否超过3小时
+  if (now - disabledTime > BAIDU_DISABLED_TIMEOUT) {
+    console.log(`[Background] 标签页 ${tabId} 的百度代理禁用状态已超过3小时，自动清理`);
+    tabBaiduDisabled.delete(tabId);
+    return false;
+  }
+  
+  return true;
 }
 
 // 设置标签页百度代理禁用状态
 function setTabBaiduDisabled(tabId) {
   if (tabId) {
-    tabBaiduDisabled.add(tabId);
+    // 先清理超时的条目
+    const now = Date.now();
+    let cleanedCount = 0;
+    
+    for (const [existingTabId, disabledTime] of tabBaiduDisabled.entries()) {
+      if (now - disabledTime > BAIDU_DISABLED_TIMEOUT) {
+        tabBaiduDisabled.delete(existingTabId);
+        cleanedCount++;
+      }
+    }
+    
+    if (cleanedCount > 0) {
+      console.log(`[Background] 清理了 ${cleanedCount} 个超时的百度代理禁用条目`);
+    }
+    
+    // 设置新的禁用条目
+    tabBaiduDisabled.set(tabId, now);
+    console.log(`[Background] 设置标签页 ${tabId} 的百度代理为禁用状态，将在3小时后自动重置`);
   }
 }
 
-// 清理标签页状态
-function cleanupTabState(tabId) {
-  if (tabId) {
-    tabBaiduDisabled.delete(tabId);
-    console.log(`[Background] 清理标签页 ${tabId} 的状态`);
-  }
-}
 
-// 监听标签页关闭事件，清理相关状态
-chrome.tabs.onRemoved.addListener((tabId) => {
-  cleanupTabState(tabId);
-});
 
 // 通用的API请求函数
 async function makeApiRequest(url, apiName, responseParser, tabId = null) {
@@ -121,7 +142,7 @@ async function handleTranslation(text, isChineseUser, tabId) {
   let translationResult = '';
   
   if (isChineseUser) {
-    // 检查当前标签页是否已禁用百度代理
+    // 检查当前标签页是否已禁用百度代理（包含时间检查）
     if (isTabBaiduDisabled(tabId)) {
       console.log(`[Background] 标签页 ${tabId} 已禁用百度代理，直接使用MyMemory翻译`);
       translationResult = await translateWithApi('myMemory', text, tabId);
